@@ -54,6 +54,8 @@ def main():
 
     print("📊 Converting to DataFrame...")
     df = pd.read_excel(excel_bytes)
+    df = df.fillna("")  # Replace NaN with empty string so it's JSON safe
+
 
     print("📤 Uploading to Google Sheets...")
     upload_to_google_sheet(df)
