@@ -31,13 +31,19 @@ def upload_to_google_sheet(df):
         'https://spreadsheets.google.com/feeds',
         'https://www.googleapis.com/auth/drive',
     ]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, scope)
+    
+    creds_json = os.environ.get("GOOGLE_CREDS_JSON")
+    if creds_json is None:
+        raise Exception("Missing GOOGLE_CREDS_JSON environment variable")
+
+    creds_dict = json.loads(creds_json)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
 
-
     sheet = client.open(SHEET_NAME).sheet1
-    sheet.clear()  # Clear previous data
+    sheet.clear()
     sheet.update([df.columns.values.tolist()] + df.values.tolist())
+
 
 def main():
     print("📥 Downloading Excel from Rough Country...")
