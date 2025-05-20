@@ -6,10 +6,13 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
 
+
 # Load JSON from environment variable
 creds_json = os.environ.get("GOOGLE_CREDS_JSON")
 if creds_json is None:
     raise Exception("Missing GOOGLE_CREDS_JSON environment variable")
+
+SHEET_NAME = "Rough Country Inventory"
 
 creds_dict = json.loads(creds_json)
 
