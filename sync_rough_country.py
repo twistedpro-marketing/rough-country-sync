@@ -1,14 +1,21 @@
 import os
+import json
 import pandas as pd
 import requests
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
 
-print("DEBUG – Files in /mnt/data:")
-print(os.listdir("/mnt/data"))
+# Load JSON from environment variable
+creds_json = os.environ.get("GOOGLE_CREDS_JSON")
+if creds_json is None:
+    raise Exception("Missing GOOGLE_CREDS_JSON environment variable")
 
-CREDENTIALS_FILE = f"/mnt/data/{os.environ.get('GOOGLE_CREDS_FILE', 'credentials.json')}"
+creds_dict = json.loads(creds_json)
+
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+client = gspread.authorize(creds)
 
 
 # --- FTP File (Actually an HTTPS Feed from Rough Country) ---
