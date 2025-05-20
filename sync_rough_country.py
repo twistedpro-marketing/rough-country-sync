@@ -6,7 +6,8 @@ from io import BytesIO
 
 # --- Google Sheets Config ---
 SHEET_NAME = "Rough Country Inventory"  # Change if your sheet name is different
-CREDENTIALS_FILE = "credentials.json"   # This will be used in Railway later
+CREDENTIALS_FILE = f"/mnt/data/{os.environ.get('GOOGLE_CREDS_FILE', 'credentials.json')}"
+   # This will be used in Railway later
 
 # --- FTP File (Actually an HTTPS Feed from Rough Country) ---
 EXCEL_URL = "https://feeds.roughcountry.com/jobber_pc1.xlsx"
