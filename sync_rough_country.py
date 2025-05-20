@@ -5,7 +5,11 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
 
+print("DEBUG – Files in /mnt/data:")
+print(os.listdir("/mnt/data"))
+
 CREDENTIALS_FILE = f"/mnt/data/{os.environ.get('GOOGLE_CREDS_FILE', 'credentials.json')}"
+
 
 # --- FTP File (Actually an HTTPS Feed from Rough Country) ---
 EXCEL_URL = "https://feeds.roughcountry.com/jobber_pc1.xlsx"
@@ -22,6 +26,7 @@ def upload_to_google_sheet(df):
     ]
     creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, scope)
     client = gspread.authorize(creds)
+
 
     sheet = client.open(SHEET_NAME).sheet1
     sheet.clear()  # Clear previous data
