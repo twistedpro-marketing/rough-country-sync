@@ -59,10 +59,10 @@ def main():
 
     # Replace NaN with empty strings (safe for Sheets)
     for col in df.columns:
-    if df[col].dtype == float:
-        df[col] = df[col].fillna(0)  # or NaN-safe value like 0
-    else:
-        df[col] = df[col].fillna("")
+        if df[col].dtype == float:
+            df[col] = df[col].fillna(0)
+        else:
+            df[col] = df[col].fillna("")
 
 
     # Combine NV_Stock and TN_Stock into a new column
