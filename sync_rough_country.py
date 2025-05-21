@@ -47,6 +47,25 @@ def upload_to_google_sheet(df):
     sheet.clear()
     sheet.update([df.columns.values.tolist()] + df.values.tolist())
 
+    # Create Shopify-formatted DataFrame
+    shopify_df = pd.DataFrame()
+    shopify_df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
+    shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
+    shopify_df["Vendor"] = "Rough Country"
+    shopify_df["Variant SKU"] = df["Part #"]
+    shopify_df["Variant Inventory Qty"] = df["Inventory"]
+    shopify_df["Variant Price"] = df.get("Jobber", 0)
+    shopify_df["Image Src"] = df.get("Image Link", "")
+
+    # Reorder columns
+    shopify_df = shopify_df[
+        ["Handle", "Title", "Vendor", "Variant SKU", "Variant Inventory Qty", "Variant Price", "Image Src"]
+    ]
+
+    # Upload to new tab
+    upload_shopify_sheet(shopify_df)
+
+
 def main():
     print("📥 Downloading Excel from Rough Country...")
     excel_bytes = fetch_excel_from_rough_country()
@@ -80,6 +99,27 @@ def main():
     # ...
     }
 
+    # Build Shopify-friendly columns
+    df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
+    df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
+    df["Vendor"] = "Rough Country"
+    df["Variant SKU"] = df["Part #"]
+    df["Variant Inventory Qty"] = df["Inventory"]
+    df["Variant Price"] = df.get("Jobber", 0)  # You can swap this for MAP or MSRP if preferred
+    df["Image Src"] = df.get("Image Link", "")  # Or update to actual column if available
+
+    shopify_cols = [
+    "Handle",
+    "Title",
+    "Vendor",
+    "Variant SKU",
+    "Variant Inventory Qty",
+    "Variant Price",
+    "Image Src",
+]
+
+df = df[shopify_cols]
+
 
     # Optional: Rename columns to match Shopify
     rename_map = {
@@ -95,6 +135,32 @@ def main():
     upload_to_google_sheet(df)
 
     print("✅ Sync complete!")
+
+    def upload_shopify_sheet(df, sheet_name="Shopify Export"):
+    scope = [
+        'https://spreadsheets.google.com/feeds',
+        'https://www.googleapis.com/auth/drive',
+    ]
+
+    creds_json = os.environ.get("GOOGLE_CREDS_JSON")
+    if creds_json is None:
+        raise Exception("Missing GOOGLE_CREDS_JSON environment variable")
+
+    creds_dict = json.loads(creds_json)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    client = gspread.authorize(creds)
+
+    spreadsheet = client.open(SHEET_NAME)
+
+    try:
+        worksheet = spreadsheet.worksheet(sheet_name)
+        worksheet.clear()
+    except gspread.exceptions.WorksheetNotFound:
+        worksheet = spreadsheet.add_worksheet(title=sheet_name, rows="1000", cols="20")
+
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+
+
 
 
 if __name__ == "__main__":
