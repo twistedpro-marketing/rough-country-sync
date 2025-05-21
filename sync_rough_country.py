@@ -58,11 +58,28 @@ def main():
     df.dropna(how="all", inplace=True)
 
     # Replace NaN with empty strings (safe for Sheets)
-    df.fillna("", inplace=True)
+    for col in df.columns:
+    if df[col].dtype == float:
+        df[col] = df[col].fillna(0)  # or NaN-safe value like 0
+    else:
+        df[col] = df[col].fillna("")
 
-    # Filter: Only include rows where Qty On Hand > 0
-    if "Qty On Hand" in df.columns:
-        df = df[df["Qty On Hand"] > 0]
+
+    # Combine NV_Stock and TN_Stock into a new column
+    if "NV_Stock" in df.columns and "TN_Stock" in df.columns:
+        df["NV_Stock"] = pd.to_numeric(df["NV_Stock"], errors="coerce").fillna(0)
+        df["TN_Stock"] = pd.to_numeric(df["TN_Stock"], errors="coerce").fillna(0)
+        df["Total_Stock"] = df["NV_Stock"] + df["TN_Stock"]
+    else:
+        df["Total_Stock"] = 0  # fallback if columns missing
+
+    # Filter: Only include rows
+    df = df[df["Inventory"] > 0]
+    rename_map = {
+    "Inventory": "variant_inventory_qty",
+    # ...
+    }
+
 
     # Optional: Rename columns to match Shopify
     rename_map = {
