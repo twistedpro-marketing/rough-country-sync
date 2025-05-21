@@ -83,4 +83,27 @@ def main():
     shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
     shopify_df["Vendor"] = "Rough Country"
     shopify_df["Variant SKU"] = df["Part #"]
-    shopify_df_
+    shopify_df["Variant Inventory Qty"] = df["Inventory"]
+    shopify_df["Variant Price"] = df.get("Jobber", 0)
+    shopify_df["Image Src"] = df.get("Image Link", "")
+
+    # === Add Metafields ===
+    shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
+    shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
+    shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
+
+    # === Final column order ===
+    shopify_df = shopify_df[
+        [
+            "Handle",
+            "Title",
+            "Vendor",
+            "Variant SKU",
+            "Variant Inventory Qty",
+            "Variant Price",
+            "Image Src",
+            "product.metafields.custom.description_tag",
+            "product.metafields.custom.1_backspacing",
+            "product.metafields.custom.1_wheel_diameter",
+        ]
+    ]
