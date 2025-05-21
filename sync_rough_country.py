@@ -116,12 +116,11 @@ def main():
     "Variant Inventory Qty",
     "Variant Price",
     "Image Src",
-]
+    ]
 
-df = df[shopify_cols]
+    df = df[shopify_cols]
 
-
-    # Optional: Rename columns to match Shopify
+     # Optional: Rename columns to match Shopify
     rename_map = {
         "backspacing": "1_backspacing",
         "diameter": "1_wheel_diameter",
