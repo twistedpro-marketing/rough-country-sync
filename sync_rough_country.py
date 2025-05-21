@@ -44,6 +44,8 @@ def upload_shopify_sheet(df, sheet_name="Shopify Export"):
     except gspread.exceptions.WorksheetNotFound:
         worksheet = spreadsheet.add_worksheet(title=sheet_name, rows="1000", cols="20")
 
+    print(f"✅ Writing {len(df)} rows to '{sheet_name}' tab")
+
     worksheet.update([df.columns.values.tolist()] + df.values.tolist())
 
 
@@ -54,6 +56,10 @@ def main():
 
     print("📊 Converting to DataFrame...")
     df = pd.read_excel(excel_bytes)
+
+    print("🛒 Sending Shopify data to export tab...")
+
+    upload_shopify_sheet(shopify_df)
 
     # Clean and prepare data
     df.dropna(how="all", inplace=True)
