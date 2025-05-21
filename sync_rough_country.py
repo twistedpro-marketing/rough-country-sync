@@ -54,7 +54,28 @@ def main():
 
     print("📊 Converting to DataFrame...")
     df = pd.read_excel(excel_bytes)
-    df = df.fillna("")  # Replace NaN with empty string so it's JSON safe
+
+# Remove completely empty rows
+df.dropna(how="all", inplace=True)
+
+# Replace NaN with empty strings (safe for Sheets)
+df.fillna("", inplace=True)
+
+# Filter: Only include rows where inventory > 0
+# (Adjust to the exact column name for inventory)
+if "Qty On Hand" in df.columns:
+    df = df[df["Qty On Hand"] > 0]
+
+# Optional: Rename columns to match Shopify format
+rename_map = {
+    "backspacing": "1_backspacing",
+    "diameter": "1_wheel_diameter",
+    "size_desc": "description_tag",
+    # Add more as needed
+}
+
+df.rename(columns=rename_map, inplace=True)
+
 
 
     print("📤 Uploading to Google Sheets...")
