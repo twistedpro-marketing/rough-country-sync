@@ -140,3 +140,10 @@ def main():
             "product.metafields.custom.1_wheel_diameter",
         ]
     ]
+
+if __name__ == "__main__":
+    print("🚀 Calling main()...")
+    try:
+        main()
+    except Exception as e:
+        print(f"❌ Script failed with error: {e}")
