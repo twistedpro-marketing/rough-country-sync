@@ -81,10 +81,12 @@ def main():
 
         # Build Shopify-formatted export
         shopify_df = pd.DataFrame()
-        shopify_df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
-        shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
+        shopify_df["Handle"] = df["sku"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
+        shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["sku"]
+
         shopify_df["Vendor"] = "Rough Country"
-        shopify_df["Variant SKU"] = df["Part #"]
+        shopify_df["Variant SKU"] = df["sku"]
+
         shopify_df["Variant Inventory Qty"] = df["Inventory"]
         shopify_df["Variant Price"] = df.get("Jobber", 0)
         shopify_df["Image Src"] = df.get("Image Link", "")
