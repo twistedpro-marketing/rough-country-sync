@@ -51,6 +51,28 @@ def upload_shopify_sheet(df, sheet_name="Shopify Export"):
 
 # === Main ===
 def main():
+
+    print("🔍 [DEBUG] Script has started.")
+
+    try:
+        print("🔍 [DEBUG] About to fetch Excel...")
+        excel_bytes = fetch_excel_from_rough_country()
+        print("✅ Excel downloaded.")
+
+        print("🔍 [DEBUG] Reading into DataFrame...")
+        df = pd.read_excel(excel_bytes)
+        print("✅ DataFrame created with", len(df), "rows.")
+
+        # Optional: print headers to confirm format
+        print("🧠 Column headers:", list(df.columns))
+
+    except Exception as e:
+        print("❌ ERROR during setup:", str(e))
+        return
+
+
+
+    
     print("📥 Downloading Excel from Rough Country...")
     excel_bytes = fetch_excel_from_rough_country()
 
