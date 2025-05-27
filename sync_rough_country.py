@@ -111,7 +111,7 @@ def main():
                 }
                 if i == 0:
                     shopify_row.update({
-                        "Title": row.get("description", ""),
+                        "Title": row.get("title", ""),
                         "Vendor": "Rough Country",
                         "Variant SKU": row["sku"],
                         "Variant Inventory Qty": row["Inventory"],
