@@ -138,6 +138,8 @@ def main():
         def load_existing_handles():
             try:
                 handle_sheet = client.open("Rough Country Inventory").worksheet("rc-handles")
+
+
                 data = handle_sheet.get_all_records()
                 return pd.DataFrame(data)
             except Exception as e:
