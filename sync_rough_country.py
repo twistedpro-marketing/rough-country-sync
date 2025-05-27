@@ -134,6 +134,18 @@ def main():
                     })
                 shopify_rows.append(shopify_row)
 
+        # === Load existing Shopify handles from separate sheet ===
+        def load_existing_handles():
+            try:
+                handle_sheet = client.open(Rough Country Inventory).worksheet("rc-handles")
+                data = handle_sheet.get_all_records()
+                return pd.DataFrame(data)
+            except Exception as e:
+                print(f"⚠️ Could not load Shopify Handles sheet: {e}")
+                return pd.DataFrame(columns=["SKU", "Handle"])
+
+        existing_handles_df = load_existing_handles()=
+
         shopify_df = pd.DataFrame(shopify_rows)
         shopify_df = shopify_df.applymap(lambda x: "" if pd.isna(x) else x).fillna("")
 
@@ -164,6 +176,18 @@ def main():
         print("🥣 Sending UTV data to 'rough-country-UTV-only' tab...")
         upload_shopify_sheet(utv_df, sheet_name="rough-country-UTV-only")
         print("✅ UTV sheet export complete.")
+
+        # Merge original handles using SKU
+        shopify_df = pd.merge(
+            shopify_df,
+            existing_handles_df.rename(columns={"SKU": "Variant SKU"}),
+            on="Variant SKU",
+            how="left"
+        )
+
+        # If handle exists in Shopify, use it. Otherwise, generate one
+        shopify_df["Handle"] = shopify_df["Handle_y"].combine_first(shopify_df["Handle_x"])
+        shopify_df.drop(columns=["Handle_x", "Handle_y"], inplace=True)
 
     except Exception as e:
         print(f"❌ Script crashed: {e}")
