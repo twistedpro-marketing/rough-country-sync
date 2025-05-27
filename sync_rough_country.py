@@ -115,7 +115,6 @@ def main():
 
         shopify_df = pd.DataFrame(shopify_rows)
 
-
         # Reorder columns
         shopify_df = shopify_df[
             [
@@ -132,9 +131,8 @@ def main():
                 "product.metafields.custom.1_wheel_diameter",
             ]
         ]
-
         # Clean up remaining NaN values (Google Sheets can't handle JSON NaN)
-        shopify_df = shopify_df.replace({pd.NA: "", None: "", float("nan"): ""})
+        shopify_df = shopify_df.applymap(lambda x: "" if pd.isna(x) else x)
         shopify_df = shopify_df.fillna("")
 
         print("🛒 Sending Shopify data to export tab...")
