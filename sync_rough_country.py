@@ -1,5 +1,6 @@
-print("🐍 Script entrypoint reached.")
 import os
+print("🐍 Script entrypoint reached.")
+
 import json
 import pandas as pd
 import requests
