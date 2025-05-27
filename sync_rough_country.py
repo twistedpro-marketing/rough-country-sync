@@ -53,43 +53,33 @@ def upload_shopify_sheet(df, sheet_name="Shopify Export"):
 
 # === Main ===
 def main():
-def main():
-    print("🔍 [DEBUG] Script has started.")
+    print("🔍 Script has started.")
 
     try:
-        print("🔍 [DEBUG] About to fetch Excel...")
+        # Fetch and load Excel
+        print("📥 Downloading Excel from Rough Country...")
         excel_bytes = fetch_excel_from_rough_country()
-        print("✅ Excel downloaded.")
-
-        print("🔍 [DEBUG] Reading into DataFrame...")
+        print("📊 Reading into DataFrame...")
         df = pd.read_excel(excel_bytes)
-        print("✅ DataFrame created with", len(df), "rows.")
+        print(f"✅ DataFrame loaded with {len(df)} rows.")
+        print(f"🧠 Columns: {list(df.columns)}")
 
-        print("🧠 Column headers:", list(df.columns))
+        # Combine stock columns
+        df["NV_Stock"] = pd.to_numeric(df.get("NV_Stock", 0), errors="coerce").fillna(0)
+        df["TN_Stock"] = pd.to_numeric(df.get("TN_Stock", 0), errors="coerce").fillna(0)
+        df["Inventory"] = df["NV_Stock"] + df["TN_Stock"]
 
-        # Clean and prepare data
-        df.dropna(how="all", inplace=True)
+        # Filter and clean
+        df = df[df["Inventory"] > 0]
+        df.fillna("", inplace=True)
 
-        for col in df.columns:
-            if df[col].dtype == float:
-                df[col] = df[col].fillna(0)
-            else:
-                df[col] = df[col].fillna("")
+        print(f"🧹 Cleaned DataFrame has {len(df)} in-stock rows.")
 
-        # Combine NV and TN stock
-        if "NV_Stock" in df.columns and "TN_Stock" in df.columns:
-            df["NV_Stock"] = pd.to_numeric(df["NV_Stock"], errors="coerce").fillna(0)
-            df["TN_Stock"] = pd.to_numeric(df["TN_Stock"], errors="coerce").fillna(0)
-            df["Inventory"] = df["NV_Stock"] + df["TN_Stock"]
-        else:
-            df["Inventory"] = 0
-
-        df = df[df["Inventory"] > 0]  # Only keep in-stock items
-
+        # Upload full inventory
         print("📤 Uploading full cleaned data...")
         upload_to_google_sheet(df)
 
-        # === Build Shopify-formatted DataFrame ===
+        # Build Shopify-formatted export
         shopify_df = pd.DataFrame()
         shopify_df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
         shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
@@ -102,10 +92,7 @@ def main():
         shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
         shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
 
-        print("🛒 Sending Shopify data to export tab...")
-        upload_shopify_sheet(shopify_df)
-
-        # Final column order (optional)
+        # Reorder columns
         shopify_df = shopify_df[
             [
                 "Handle",
@@ -121,13 +108,18 @@ def main():
             ]
         ]
 
+        print("🛒 Sending Shopify data to export tab...")
+        upload_shopify_sheet(shopify_df)
         print("✅ Sync complete!")
-        time.sleep(30)
 
     except Exception as e:
-        print(f"❌ Script failed with error: {e}")
+        print(f"❌ Script crashed: {e}")
+
+    # Keep container alive for 30s to view logs
+    import time
+    time.sleep(30)
 
 
 if __name__ == "__main__":
-    print("🚀 Calling main()...")
+    print("🐍 Script entrypoint reached.")
     main()
