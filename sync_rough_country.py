@@ -76,6 +76,12 @@ def main():
             else:
                 df[col] = df[col].fillna("")
 
+        # === Split into UTV and non-UTV ===
+        df_utv = df[df["utv_product"] == "y"].copy()
+        df_non_utv = df[df["utv_product"] != "y"].copy()
+
+        print(f"🧃 Found {len(df_utv)} UTV rows and {len(df_non_utv)} non-UTV rows.")
+
 
         print(f"🧹 Cleaned DataFrame has {len(df)} in-stock rows.")
 
@@ -86,7 +92,7 @@ def main():
         # Build Shopify-formatted export with multi-image handling
         shopify_rows = []
 
-        for _, row in df.iterrows():
+        for _, row in df_non_utv.iterrows():
             handle = row["sku"].lower().replace(" ", "-")
             images = [row.get(f"image_{i}", "") for i in range(1, 7)]
             images = [img for img in images if img]  # Remove blanks
@@ -138,6 +144,16 @@ def main():
         print("🛒 Sending Shopify data to export tab...")
         upload_shopify_sheet(shopify_df)
         print("✅ Sync complete!")
+
+        # === Export UTV Products to a Separate Sheet ===
+        print("🧃 Sending UTV data to 'rough-country-UTV-only' tab...")
+
+        # Build simplified UTV export (or same format if you want)
+        utv_export_df = df_utv  # For now, we export it raw — update later if needed
+
+        upload_shopify_sheet(utv_export_df, sheet_name="rough-country-UTV-only")
+        print("✅ UTV sheet export complete.")
+
 
     except Exception as e:
         print(f"❌ Script crashed: {e}")
