@@ -83,37 +83,56 @@ def main():
         print("📤 Uploading full cleaned data...")
         upload_to_google_sheet(df)
 
-        # Build Shopify-formatted export
-        shopify_df = pd.DataFrame()
-        shopify_df["Handle"] = df["sku"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
-        shopify_df["Title"] = df["description"] if "description" in df.columns else df["sku"]
+        # Build Shopify-formatted export with multi-image handling
+        shopify_rows = []
 
+        for _, row in df.iterrows():
+            handle = row["sku"].lower().replace(" ", "-")
+            images = [row.get(f"image_{i}", "") for i in range(1, 7)]
+            images = [img for img in images if img]  # Remove blanks
 
-        shopify_df["Vendor"] = "Rough Country"
-        shopify_df["Variant SKU"] = df["sku"]
+            for i, img in enumerate(images):
+                shopify_row = {
+                    "Handle": handle,
+                    "Image Src": img,
+                    "Image Position": i + 1,
+                }
 
-        shopify_df["Variant Inventory Qty"] = df["Inventory"]
-        shopify_df["Variant Price"] = df.get("price", 0)
-        shopify_df["Image Src"] = df.get("image_1", "")
-        shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
-        shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
-        shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
+                # Add full product details only for the first image
+                if i == 0:
+                    shopify_row.update({
+                        "Title": row.get("description", ""),
+                        "Vendor": "Rough Country",
+                        "Variant SKU": row["sku"],
+                        "Variant Inventory Qty": row["Inventory"],
+                        "Variant Price": row.get("price", 0),
+                        "product.metafields.custom.description_tag": row.get("size_desc", ""),
+                        "product.metafields.custom.1_backspacing": row.get("backspacing", ""),
+                        "product.metafields.custom.1_wheel_diameter": row.get("diameter", ""),
+                    })
+
+                shopify_rows.append(shopify_row)
+
+        shopify_df = pd.DataFrame(shopify_rows)
+
 
         # Reorder columns
         shopify_df = shopify_df[
-            [
-                "Handle",
-                "Title",
-                "Vendor",
-                "Variant SKU",
-                "Variant Inventory Qty",
-                "Variant Price",
-                "Image Src",
-                "product.metafields.custom.description_tag",
-                "product.metafields.custom.1_backspacing",
-                "product.metafields.custom.1_wheel_diameter",
-            ]
+        [
+            "Handle",
+            "Title",
+            "Vendor",
+            "Variant SKU",
+            "Variant Inventory Qty",
+            "Variant Price",
+            "Image Src",
+            "Image Position",
+            "product.metafields.custom.description_tag",
+            "product.metafields.custom.1_backspacing",
+            "product.metafields.custom.1_wheel_diameter",
         ]
+    ]
+
 
         print("🛒 Sending Shopify data to export tab...")
         upload_shopify_sheet(shopify_df)
