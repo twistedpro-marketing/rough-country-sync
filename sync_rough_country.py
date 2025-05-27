@@ -70,11 +70,11 @@ def main():
         df["Inventory"] = df["NV_Stock"] + df["TN_Stock"]
 
         # Filter and clean
-        for col in df.columns:
-            if df[col].dtype == float:
-                df[col] = df[col].fillna(0)
-            else:
-                df[col] = df[col].fillna("")
+    for col in df.columns:
+        if df[col].dtype == float:
+            df[col] = df[col].fillna(0)
+        else:
+            df[col] = df[col].fillna("")
 
 
         print(f"🧹 Cleaned DataFrame has {len(df)} in-stock rows.")
