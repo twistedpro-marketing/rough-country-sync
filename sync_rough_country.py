@@ -71,7 +71,12 @@ def main():
 
         # Filter and clean
         df = df[df["Inventory"] > 0]
-        df.fillna("", inplace=True)
+        for col in df.columns:
+        if df[col].dtype == float:
+            df[col] = df[col].fillna(0)
+        else:
+            df[col] = df[col].fillna("")
+
 
         print(f"🧹 Cleaned DataFrame has {len(df)} in-stock rows.")
 
@@ -82,14 +87,15 @@ def main():
         # Build Shopify-formatted export
         shopify_df = pd.DataFrame()
         shopify_df["Handle"] = df["sku"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
-        shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["sku"]
+        shopify_df["Title"] = df["description"] if "description" in df.columns else df["sku"]
+
 
         shopify_df["Vendor"] = "Rough Country"
         shopify_df["Variant SKU"] = df["sku"]
 
         shopify_df["Variant Inventory Qty"] = df["Inventory"]
-        shopify_df["Variant Price"] = df.get("Jobber", 0)
-        shopify_df["Image Src"] = df.get("Image Link", "")
+        shopify_df["Variant Price"] = df.get("price", 0)
+        shopify_df["Image Src"] = df.get("image_1", "")
         shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
         shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
         shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
