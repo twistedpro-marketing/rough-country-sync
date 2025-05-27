@@ -118,21 +118,24 @@ def main():
 
         # Reorder columns
         shopify_df = shopify_df[
-        [
-            "Handle",
-            "Title",
-            "Vendor",
-            "Variant SKU",
-            "Variant Inventory Qty",
-            "Variant Price",
-            "Image Src",
-            "Image Position",
-            "product.metafields.custom.description_tag",
-            "product.metafields.custom.1_backspacing",
-            "product.metafields.custom.1_wheel_diameter",
+            [
+                "Handle",
+                "Title",
+                "Vendor",
+                "Variant SKU",
+                "Variant Inventory Qty",
+                "Variant Price",
+                "Image Src",
+                "Image Position",
+                "product.metafields.custom.description_tag",
+                "product.metafields.custom.1_backspacing",
+                "product.metafields.custom.1_wheel_diameter",
+            ]
         ]
-    ]
 
+        # Clean up remaining NaN values (Google Sheets can't handle JSON NaN)
+        shopify_df = shopify_df.replace({pd.NA: "", None: "", float("nan"): ""})
+        shopify_df = shopify_df.fillna("")
 
         print("🛒 Sending Shopify data to export tab...")
         upload_shopify_sheet(shopify_df)
