@@ -1,3 +1,4 @@
+print("🐍 Script entrypoint reached.")
 import os
 import json
 import pandas as pd
@@ -72,7 +73,7 @@ def main():
 
 
 
-    
+
     print("📥 Downloading Excel from Rough Country...")
     excel_bytes = fetch_excel_from_rough_country()
 
@@ -119,6 +120,9 @@ def main():
     shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
     shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
     shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
+
+    import time
+    time.sleep(30)
 
     # === Final column order ===
     shopify_df = shopify_df[
