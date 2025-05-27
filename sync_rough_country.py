@@ -77,8 +77,8 @@ def main():
                 df[col] = df[col].fillna("")
 
         # === Split into UTV and non-UTV ===
-        df_utv = df[df["utv_product"] == "y"].copy()
-        df_non_utv = df[df["utv_product"] != "y"].copy()
+        df_utv = df[df["utv_product"] == "Y"].copy()
+        df_non_utv = df[df["utv_product"] != "Y"].copy()
 
         print(f"🧃 Found {len(df_utv)} UTV rows and {len(df_non_utv)} non-UTV rows.")
 
