@@ -53,7 +53,7 @@ def upload_shopify_sheet(df, sheet_name="Shopify Export"):
 
 # === Main ===
 def main():
-
+def main():
     print("🔍 [DEBUG] Script has started.")
 
     try:
@@ -65,85 +65,69 @@ def main():
         df = pd.read_excel(excel_bytes)
         print("✅ DataFrame created with", len(df), "rows.")
 
-        # Optional: print headers to confirm format
         print("🧠 Column headers:", list(df.columns))
 
-    except Exception as e:
-        print("❌ ERROR during setup:", str(e))
-        return
+        # Clean and prepare data
+        df.dropna(how="all", inplace=True)
 
+        for col in df.columns:
+            if df[col].dtype == float:
+                df[col] = df[col].fillna(0)
+            else:
+                df[col] = df[col].fillna("")
 
-
-
-    print("📥 Downloading Excel from Rough Country...")
-    excel_bytes = fetch_excel_from_rough_country()
-
-    print("📊 Converting to DataFrame...")
-    df = pd.read_excel(excel_bytes)
-
-    print("🛒 Sending Shopify data to export tab...")
-
-    upload_shopify_sheet(shopify_df)
-
-    # Clean and prepare data
-    df.dropna(how="all", inplace=True)
-
-    for col in df.columns:
-        if df[col].dtype == float:
-            df[col] = df[col].fillna(0)
+        # Combine NV and TN stock
+        if "NV_Stock" in df.columns and "TN_Stock" in df.columns:
+            df["NV_Stock"] = pd.to_numeric(df["NV_Stock"], errors="coerce").fillna(0)
+            df["TN_Stock"] = pd.to_numeric(df["TN_Stock"], errors="coerce").fillna(0)
+            df["Inventory"] = df["NV_Stock"] + df["TN_Stock"]
         else:
-            df[col] = df[col].fillna("")
+            df["Inventory"] = 0
 
-    # Combine NV and TN stock
-    if "NV_Stock" in df.columns and "TN_Stock" in df.columns:
-        df["NV_Stock"] = pd.to_numeric(df["NV_Stock"], errors="coerce").fillna(0)
-        df["TN_Stock"] = pd.to_numeric(df["TN_Stock"], errors="coerce").fillna(0)
-        df["Inventory"] = df["NV_Stock"] + df["TN_Stock"]
-    else:
-        df["Inventory"] = 0
+        df = df[df["Inventory"] > 0]  # Only keep in-stock items
 
-    df = df[df["Inventory"] > 0]  # Only keep in-stock items
+        print("📤 Uploading full cleaned data...")
+        upload_to_google_sheet(df)
 
-    print("📤 Uploading full cleaned data...")
-    upload_to_google_sheet(df)
+        # === Build Shopify-formatted DataFrame ===
+        shopify_df = pd.DataFrame()
+        shopify_df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
+        shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
+        shopify_df["Vendor"] = "Rough Country"
+        shopify_df["Variant SKU"] = df["Part #"]
+        shopify_df["Variant Inventory Qty"] = df["Inventory"]
+        shopify_df["Variant Price"] = df.get("Jobber", 0)
+        shopify_df["Image Src"] = df.get("Image Link", "")
+        shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
+        shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
+        shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
 
-    # === Build Shopify-formatted DataFrame ===
-    shopify_df = pd.DataFrame()
-    shopify_df["Handle"] = df["Part #"].astype(str).str.lower().str.replace(" ", "-").str.replace(r"[^\w\-]", "", regex=True)
-    shopify_df["Title"] = df["Description"] if "Description" in df.columns else df["Part #"]
-    shopify_df["Vendor"] = "Rough Country"
-    shopify_df["Variant SKU"] = df["Part #"]
-    shopify_df["Variant Inventory Qty"] = df["Inventory"]
-    shopify_df["Variant Price"] = df.get("Jobber", 0)
-    shopify_df["Image Src"] = df.get("Image Link", "")
+        print("🛒 Sending Shopify data to export tab...")
+        upload_shopify_sheet(shopify_df)
 
-    # === Add Metafields ===
-    shopify_df["product.metafields.custom.description_tag"] = df.get("size_desc", "")
-    shopify_df["product.metafields.custom.1_backspacing"] = df.get("backspacing", "")
-    shopify_df["product.metafields.custom.1_wheel_diameter"] = df.get("diameter", "")
-
-    import time
-    time.sleep(30)
-
-    # === Final column order ===
-    shopify_df = shopify_df[
-        [
-            "Handle",
-            "Title",
-            "Vendor",
-            "Variant SKU",
-            "Variant Inventory Qty",
-            "Variant Price",
-            "Image Src",
-            "product.metafields.custom.description_tag",
-            "product.metafields.custom.1_backspacing",
-            "product.metafields.custom.1_wheel_diameter",
+        # Final column order (optional)
+        shopify_df = shopify_df[
+            [
+                "Handle",
+                "Title",
+                "Vendor",
+                "Variant SKU",
+                "Variant Inventory Qty",
+                "Variant Price",
+                "Image Src",
+                "product.metafields.custom.description_tag",
+                "product.metafields.custom.1_backspacing",
+                "product.metafields.custom.1_wheel_diameter",
+            ]
         ]
-    ]
+
+        print("✅ Sync complete!")
+        time.sleep(30)
+
+    except Exception as e:
+        print(f"❌ Script failed with error: {e}")
+
 
 if __name__ == "__main__":
     print("🚀 Calling main()...")
-    try:
-        main()
-    except Exception as e:
-        print(f"❌ Script failed with error: {e}")
+    main()
