@@ -50,17 +50,6 @@ def upload_shopify_sheet(df, sheet_name="Shopify Export"):
 
     worksheet.update([df.columns.values.tolist()] + df.values.tolist())
 
-    # Determine availability status
-    availability_raw = row.get("availability", "").lower()
-    availability_status = "In Stock"
-
-    if "backorder" in availability_raw:
-        import re
-        match = re.search(r"(\d{1,2}/\d{1,2}/\d{2,4})", availability_raw)
-        if match:
-            availability_status = f"Backorder (Restock: {match.group(1)})"
-        else:
-            availability_status = "Backorder (Restock date unknown)"
 
 
 # === Main ===
