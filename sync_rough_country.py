@@ -142,7 +142,7 @@ def main():
                         "Weight": row.get("weight", ""),
                         "Manufacturer": row.get("manufacturer", ""),
                         "UPC": row.get("upc", ""),
-                        "Category": row.get("category", "")
+                        "Category": row.get("category", ""),
                         "product.metafields.custom.availability_status": availability_status,
                         "Variant Weight": row.get("weight", ""),
                         "Variant Barcode": row.get("upc", ""),
