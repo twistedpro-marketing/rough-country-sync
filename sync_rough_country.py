@@ -158,7 +158,8 @@ def main():
             ]
         ]
 
-        shopify_df = shopify_df.applymap(lambda x: "" if pd.isna(x) else x).fillna("")
+        shopify_df = shopify_df.fillna("").astype(str)
+
 
         print("🛒 Sending Shopify data to export tab...")
         upload_shopify_sheet(shopify_df)
