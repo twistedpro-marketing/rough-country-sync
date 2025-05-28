@@ -150,7 +150,7 @@ def main():
                         "product.metafields.custom.category": row.get("category", ""),
                         "product.metafields.custom.variant_height": row.get("height", ""),
                         "product.metafields.custom.variant_width": row.get("width", ""),
-                        "product.metafields.custom.variant_length": row.get("length", ""),
+                        "product.metafields.custom.variant_length": row.get("length", "")
 
                     })
 
