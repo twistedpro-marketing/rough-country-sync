@@ -138,6 +138,7 @@ def main():
                         "Variant Inventory Qty": row["Inventory"],
                         "Variant Price": row.get("price", 0),
                         "Variant Cost": row.get("cost", 0),
+                        "Cost per item": row.get("cost", ""),
                         "product.metafields.custom.description_tag": row.get("size_desc", ""),
                         "product.metafields.custom.1_backspacing": row.get("backspacing", ""),
                         "product.metafields.custom.1_wheel_diameter": row.get("diameter", ""),
@@ -173,9 +174,17 @@ def main():
         # Reorder columns
         shopify_df = shopify_df[
             [
-                "Handle", "Title", "Body (HTML)", "Vendor", "Variant SKU",
-                "Variant Inventory Qty", "Variant Price", "Cost per item",
-                "Image Src", "Image Position",
+                "Handle",
+                "Title",
+                "Body (HTML)",
+                "Vendor",
+                "Variant SKU",
+                "Variant Inventory Qty",
+                "Variant Price",
+                "Cost per item",  # <--- This must match the string key above
+                "Image Src",
+                "Image Position",
+                "product.metafields.custom.availability_status",
                 "product.metafields.custom.description_tag",
                 "product.metafields.custom.1_backspacing",
                 "product.metafields.custom.1_wheel_diameter",
@@ -184,12 +193,16 @@ def main():
                 "product.metafields.custom.guides",
                 "product.metafields.custom.time",
                 "product.metafields.custom.tire_size",
-                "product.metafields.custom.components",
                 "product.metafields.custom.video_url",
+                "product.metafields.custom.components",
                 "product.metafields.convermax.fitment",
-                "Weight", "Manufacturer", "UPC", "Category"
+                "Weight",
+                "Manufacturer",
+                "UPC",
+                "Category"
             ]
         ]
+
 
         shopify_df = shopify_df.fillna("").astype(str)
 
