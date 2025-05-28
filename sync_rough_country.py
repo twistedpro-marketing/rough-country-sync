@@ -144,6 +144,14 @@ def main():
                         "UPC": row.get("upc", ""),
                         "Category": row.get("category", "")
                         "product.metafields.custom.availability_status": availability_status,
+                        "Variant Weight": row.get("weight", ""),
+                        "Variant Barcode": row.get("upc", ""),
+                        "product.metafields.custom.brand": row.get("manufacturer", ""),
+                        "product.metafields.custom.category": row.get("category", ""),
+                        "product.metafields.custom.variant_height": row.get("height", ""),
+                        "product.metafields.custom.variant_width": row.get("width", ""),
+                        "product.metafields.custom.variant_length": row.get("length", ""),
+
                     })
 
 
