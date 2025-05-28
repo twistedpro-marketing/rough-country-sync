@@ -127,7 +127,7 @@ def main():
                         "Variant SKU": row["sku"],
                         "Variant Inventory Qty": row["Inventory"],
                         "Variant Price": row.get("price", 0),
-                        "Cost per item": row.get("cost", 0),
+                        "Variant Cost": row.get("cost", 0),
                         "product.metafields.custom.description_tag": row.get("size_desc", ""),
                         "product.metafields.custom.1_backspacing": row.get("backspacing", ""),
                         "product.metafields.custom.1_wheel_diameter": row.get("diameter", ""),
