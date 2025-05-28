@@ -146,7 +146,7 @@ def main():
                 print(f"⚠️ Could not load Shopify Handles sheet: {e}")
                 return pd.DataFrame(columns=["SKU", "Handle"])
 
-        existing_handles_df = load_existing_handles()=
+        existing_handles_df = load_existing_handles()
 
         shopify_df = pd.DataFrame(shopify_rows)
         shopify_df = shopify_df.applymap(lambda x: "" if pd.isna(x) else x).fillna("")
