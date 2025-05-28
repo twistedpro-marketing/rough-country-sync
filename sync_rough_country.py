@@ -106,6 +106,16 @@ def main():
             handle = row["sku"].lower().replace(" ", "-")
             images = [row.get(f"image_{i}", "") for i in range(1, 7)]
             images = [img for img in images if img]
+            availability_raw = str(row.get("availability", "")).lower()
+
+            if "backorder" in availability_raw:
+                restock_date = row.get("special_from_date", "")
+                availability_status = f"Backorder - Restock {restock_date}" if restock_date else "Backorder"
+            elif "in stock" in availability_raw or row.get("Inventory", 0) > 0:
+                availability_status = "In Stock"
+            else:
+                availability_status = "Out of Stock"
+
 
             for i, img in enumerate(images):
                 shopify_row = {
